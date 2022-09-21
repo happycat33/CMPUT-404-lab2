@@ -49,50 +49,30 @@ def send_data(serversocket, payload):
     print("Payload sent successfully")
 
 def main():
-    try:
-        PROXY_HOST = 'www.google.com'
-        PROXY_PORT = 80
+    PROXY_HOST = 'www.google.com'
+    PROXY_PORT = 80
 
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
-            #QUESTION 3
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        #QUESTION 3
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-            #bind socket to address
-            s.bind((HOST, PORT))
-            #set to listening mode
-            s.listen(2)
+        #bind socket to address
+        s.bind((HOST, PORT))
+        #set to listening mode
+        s.listen(2)
 
-            #continuously listen for connections
-            while True:
-                conn, addr = s.accept()
-                print("Connected by", addr)
+        #continuously listen for connections
+        while True:
+            conn, addr = s.accept()
+            print("Connected by", addr)
 
-                #create a new socket 
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
-                        
-                    #recieve data, wait a bit, then send it back
-                    full_data = conn.recv(BUFFER_SIZE)
-                    time.sleep(0.5)
-                    proxy_socket.sendall(full_data)
-                    time.sleep(0.5)
-                    proxy_socket.shutdown(socket.SHUT_WR)
-                    #continue accepting data until no more left
-                    full_data = b""
-                    while True:
-                        data = s.recv(BUFFER_SIZE)
-                        if not data:
-                            return
-                        response_data += data
-                        conn.sendall(response_data)
-                        conn.close()
-                        
-    except Exception as e:
-
-        print(e)
-
-    finally:
-        s.close()
+            #create a new socket 
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
+                    
+                    p = Process(target=(proxy_handler),args=(conn, s, proxy_socket))
+                    p.daemon = True
+                    p.start()
 
 def proxy_handler(conn, s, proxy_socket):
     #recieve data, wait a bit, then send it back
