@@ -69,22 +69,33 @@ def main():
 
             #create a new socket 
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
-                #recieve data, wait a bit, then send it back
-                full_data = conn.recv(BUFFER_SIZE)
-                time.sleep(0.5)
-                proxy_socket.sendall(full_data)
-                time.sleep(0.5)
-                proxy_socket.shutdown(socket.SHUT_WR)
-                #continue accepting data until no more left
-                full_data = b""
+                p = Process(target=proxy_handler, args=(conn, proxy_socket)) 
+                p.dameon = True
+                p.start()
 
             while True:
-                data = s.recv(BUFFER_SIZE)
-                if not data:
-                    return
-                response_data += data
-                conn.sendall(response_data)
-                conn.close()
+               p = Process(target=proxy_handler, args=(conn, s))
+               p.dameon = True
+               p.start()
+
+def proxy_handler(conn, proxy_socket):
+    #recieve data, wait a bit, then send it back
+    full_data = conn.recv(BUFFER_SIZE)
+    time.sleep(0.5)
+    proxy_socket.sendall(full_data)
+    time.sleep(0.5)
+    proxy_socket.shutdown(socket.SHUT_WR)
+
+    full_data = b""
+
+def handler(conn, s):
+    data = s.recv(BUFFER_SIZE)
+    if not data:
+        return
+    response_data += data
+    conn.sendall(response_data)
+    conn.close()
+
 
 if __name__ == "__main__":
     main()
