@@ -65,14 +65,17 @@ def main():
 
         #continue accepting data until no more left
         full_data = b""
+
         while True:
             data = s.recv(buffer_size)
             if not data:
                 break
             full_data += data
         print(full_data)
+
     except Exception as e:
         print(e)
+        
     finally:
         #always close at the end!
         s.close()
