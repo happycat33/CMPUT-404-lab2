@@ -58,7 +58,7 @@ def main():
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         #bind socket to address
-        s.bind((PROXY_HOST, PROXY_PORT))
+        s.bind((HOST, PORT))
         #set to listening mode
         s.listen(2)
 
