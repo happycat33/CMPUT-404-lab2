@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import socket
+import socket, sys
 import time
 from multiprocessing import Process
 
 #define address & buffer size
-HOST = ""
-PORT = 8001
+HOST = 'www.google.com'
+PORT = 80
 BUFFER_SIZE = 1024
 
 #create a tcp socket
@@ -49,8 +49,6 @@ def send_data(serversocket, payload):
     print("Payload sent successfully")
 
 def main():
-    PROXY_HOST = 'www.google.com'
-    PROXY_PORT = 80
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
@@ -69,28 +67,26 @@ def main():
 
             #create a new socket 
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
-                #recieve data, wait a bit, then send it back
-                full_data = conn.recv(BUFFER_SIZE)
-                time.sleep(0.5)
-                proxy_socket.sendall(full_data)
-                time.sleep(0.5)
-                proxy_socket.shutdown(socket.SHUT_WR)
+                remote_ip = get_remote_ip(HOST)
+                proxy_socket.connect((remote_ip, PORT))
+                p = Process(target=handler, args=(conn, s, proxy_socket))
+                p.dameon = True
+                p.start()
 
-                full_data = b""
+                conn.close()           
 
-            while True:
-               p = Process(target=handler, args=(conn, s))
-               p.dameon = True
-               p.start()
 
-def handler(conn, s):
+def handler(conn, s, proxy_socket):
+    #recieve data, wait a bit, then send it back
+    full_data = conn.recv(BUFFER_SIZE)
+    time.sleep(0.5)
+    proxy_socket.sendall(full_data)
+    time.sleep(0.5)
+    proxy_socket.shutdown(socket.SHUT_WR)
+    full_data = b""
     data = s.recv(BUFFER_SIZE)
-    if not data:
-        return
     response_data += data
     conn.sendall(response_data)
-    conn.close()
-
 
 if __name__ == "__main__":
     main()
