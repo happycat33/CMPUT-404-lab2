@@ -4,7 +4,6 @@ import sys
 
 #create a tcp socket
 
-
 def create_tcp_socket():
     print('Creating socket')
     try:
@@ -18,7 +17,6 @@ def create_tcp_socket():
 
 #get host information
 
-
 def get_remote_ip(host):
     print(f'Getting IP for {host}')
     try:
@@ -31,7 +29,6 @@ def get_remote_ip(host):
     return remote_ip
 
 #send data to server
-
 
 def send_data(serversocket, payload):
     print("Sending payload")

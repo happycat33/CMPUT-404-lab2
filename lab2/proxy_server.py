@@ -71,9 +71,21 @@ def main():
                 #create a new socket 
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
                         
-                        p = Process(target=(proxy_handler),args=(conn, s, proxy_socket))
-                        p.daemon = True
-                        p.start()
+                    #recieve data, wait a bit, then send it back
+                    full_data = conn.recv(BUFFER_SIZE)
+                    time.sleep(0.5)
+                    proxy_socket.sendall(full_data)
+                    time.sleep(0.5)
+                    proxy_socket.shutdown(socket.SHUT_WR)
+                    #continue accepting data until no more left
+                    full_data = b""
+                    while True:
+                        data = s.recv(BUFFER_SIZE)
+                        if not data:
+                            return
+                        response_data += data
+                        conn.sendall(response_data)
+                        conn.close()
                         
     except Exception as e:
 
@@ -82,25 +94,6 @@ def main():
     finally:
         proxy_socket.close()
         s.close()
-
-def proxy_handler(conn, s, proxy_socket):
-    #recieve data, wait a bit, then send it back
-    full_data = conn.recv(BUFFER_SIZE)
-    time.sleep(0.5)
-    proxy_socket.sendall(full_data)
-    time.sleep(0.5)
-    proxy_socket.shutdown(socket.SHUT_WR)
-    #continue accepting data until no more left
-    full_data = b""
-    while True:
-        data = s.recv(BUFFER_SIZE)
-        if not data:
-            return
-        response_data += data
-        conn.sendall(response_data)
-        conn.close()
-
-    
 
 if __name__ == "__main__":
     main()
