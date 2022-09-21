@@ -69,24 +69,19 @@ def main():
 
             #create a new socket 
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
-                p = Process(target=proxy_handler, args=(conn, proxy_socket)) 
-                p.dameon = True
-                p.start()
+                #recieve data, wait a bit, then send it back
+                full_data = conn.recv(BUFFER_SIZE)
+                time.sleep(0.5)
+                proxy_socket.sendall(full_data)
+                time.sleep(0.5)
+                proxy_socket.shutdown(socket.SHUT_WR)
+
+                full_data = b""
 
             while True:
-               p = Process(target=proxy_handler, args=(conn, s))
+               p = Process(target=handler, args=(conn, s))
                p.dameon = True
                p.start()
-
-def proxy_handler(conn, proxy_socket):
-    #recieve data, wait a bit, then send it back
-    full_data = conn.recv(BUFFER_SIZE)
-    time.sleep(0.5)
-    proxy_socket.sendall(full_data)
-    time.sleep(0.5)
-    proxy_socket.shutdown(socket.SHUT_WR)
-
-    full_data = b""
 
 def handler(conn, s):
     data = s.recv(BUFFER_SIZE)
