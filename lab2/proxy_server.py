@@ -77,20 +77,14 @@ def main():
                 proxy_socket.shutdown(socket.SHUT_WR)
                 #continue accepting data until no more left
                 full_data = b""
-            p = Process(target=(proxy_handler),args=(conn, s, proxy_socket))
-            p.daemon = True
-            p.start()
 
-def proxy_handler(conn, s):
-    while True:
-        data = s.recv(BUFFER_SIZE)
-        if not data:
-            return
-        response_data += data
-        conn.sendall(response_data)
-        conn.close()
-
-    
+            while True:
+                data = s.recv(BUFFER_SIZE)
+                if not data:
+                    return
+                response_data += data
+                conn.sendall(response_data)
+                conn.close()
 
 if __name__ == "__main__":
     main()
