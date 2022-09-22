@@ -4,8 +4,8 @@ import time
 from multiprocessing import Process
 
 #define address & buffer size
-HOST = 'www.google.com'
-PORT = 80
+HOST = '127.0.0.1'
+PORT = 8001
 BUFFER_SIZE = 1024
 
 #create a tcp socket
@@ -67,8 +67,8 @@ def main():
 
             #create a new socket 
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy_socket:
-                remote_ip = get_remote_ip(HOST)
-                proxy_socket.connect((remote_ip, PORT))
+                remote_ip = get_remote_ip('www.google.com')
+                proxy_socket.connect((remote_ip, 80))
                 p = Process(target=handler, args=(conn, s, proxy_socket))
                 p.dameon = True
                 p.start()
