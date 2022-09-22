@@ -84,8 +84,7 @@ def handler(conn, s, proxy_socket):
     time.sleep(0.5)
     proxy_socket.shutdown(socket.SHUT_WR)
     full_data = b""
-    data = s.recv(BUFFER_SIZE)
-    response_data += data
+    response_data += full_data
     conn.sendall(response_data)
 
 if __name__ == "__main__":
